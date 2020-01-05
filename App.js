@@ -108,12 +108,24 @@ export default class App extends Component {
     })
   }
 
+  stop = () => {
+    clearInterval(this.timer);
+    const timestamp = new Date().getTime();
+    const { laps, now, start } = this.state;
+    const [firstLap, ...other] = laps;
+    this.setState({
+      laps: [0, firstLap + now - start, ...other],
+      start: 0,
+      now: 0
+    })
+  }
+
   render() {
     const { now, start, laps } = this.state;
     const timer = now - start;
     return (
       <View style={styles.container}>
-        <Timer interval={timer} style={styles.timer} />
+        <Timer interval={laps.reduce((total, curr) => total + curr, 0 ) + timer} style={styles.timer} />
         {laps.length === 0 && (
           <ButtonsRow>
             <RoundButton title='Reset' color='#FFFFFF' background='#3D3D3D' />
