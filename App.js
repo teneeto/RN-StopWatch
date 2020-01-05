@@ -38,7 +38,7 @@ function Lap({ number, interval, fastest, slowest }) {
   return (
     <View style={styles.lap}>
       <Text style={lapStyle}> Lap {number}</Text>
-      <Timer style={lapStyle} interval={interval} />
+      <Timer style={[lapStyle, styles.lapTimer]} interval={interval} />
     </View>
   )
 }
@@ -97,6 +97,17 @@ export default class App extends Component {
 
   }
 
+  lap = () => {
+    const timestamp = new Date().getTime();
+    const { laps, now, start } = this.state;
+    const [firstLap, ...other] = laps;
+    this.setState({
+      laps: [0, firstLap + now - start, ...other],
+      start: timestamp,
+      now: timestamp
+    })
+  }
+
   render() {
     const { now, start, laps } = this.state;
     const timer = now - start;
@@ -111,8 +122,8 @@ export default class App extends Component {
         )}
         {start > 0 && (
           <ButtonsRow>
-            <RoundButton title='Lap' color='#FFFFFF' background='#3D3D3D' />
-            <RoundButton onPress={this.start} title='Stop' color='#E33935' background='#3C1715' />
+            <RoundButton onPress={this.lap} title='Lap' color='#FFFFFF' background='#3D3D3D' />
+            <RoundButton onPress={this.stop} title='Stop' color='#E33935' background='#3C1715' />
           </ButtonsRow>
         )}
         <LapsTable laps={laps} timer={timer} />
@@ -170,6 +181,8 @@ const styles = StyleSheet.create({
   lapText: {
     color: '#FFFFFF',
     fontSize: 18,
+  },
+  lapTimer: {
     width: 30
   },
   scrollView: {
