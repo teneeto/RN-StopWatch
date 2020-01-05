@@ -84,6 +84,10 @@ export default class App extends Component {
     }
   }
 
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+
   start = () => {
     const now = new Date().getTime();
     this.setState({
@@ -94,7 +98,6 @@ export default class App extends Component {
     this.timer = setInterval(() => {
       this.setState({ now: new Date().getTime() })
     }, 100)
-
   }
 
   lap = () => {
@@ -110,7 +113,6 @@ export default class App extends Component {
 
   stop = () => {
     clearInterval(this.timer);
-    const timestamp = new Date().getTime();
     const { laps, now, start } = this.state;
     const [firstLap, ...other] = laps;
     this.setState({
@@ -120,15 +122,34 @@ export default class App extends Component {
     })
   }
 
+  reset = () => {
+    this.setState({
+      laps: [],
+      start: 0,
+      now: 0
+    })
+  }
+
+  resume = () => {
+    const now = new Date().getTime()
+    this.setState({
+      start: now,
+      now,
+    })
+    this.timer = setInterval(() => {
+      this.setState({ now: new Date().getTime() })
+    }, 100)
+  }
+
   render() {
     const { now, start, laps } = this.state;
     const timer = now - start;
     return (
       <View style={styles.container}>
-        <Timer interval={laps.reduce((total, curr) => total + curr, 0 ) + timer} style={styles.timer} />
+        <Timer interval={laps.reduce((total, curr) => total + curr, 0) + timer} style={styles.timer} />
         {laps.length === 0 && (
           <ButtonsRow>
-            <RoundButton title='Reset' color='#FFFFFF' background='#3D3D3D' />
+            <RoundButton title='Lap' color='#8B8B90' background='#151515' disabled />
             <RoundButton onPress={this.start} title='Start' color='#50D167' background='#1B361F' />
           </ButtonsRow>
         )}
@@ -138,6 +159,13 @@ export default class App extends Component {
             <RoundButton onPress={this.stop} title='Stop' color='#E33935' background='#3C1715' />
           </ButtonsRow>
         )}
+        {laps.length > 0 && start === 0 && (
+          <ButtonsRow>
+            <RoundButton onPress={this.reset} title='Reset' color='#FFFFFF' background='#3D3D3D' />
+            <RoundButton onPress={this.resume} title='Resume' color='#50D167' background='#1B361F' />
+          </ButtonsRow>
+        )}
+
         <LapsTable laps={laps} timer={timer} />
       </View>
     );
@@ -172,7 +200,7 @@ const styles = StyleSheet.create({
     width: 76,
     height: 76,
     borderRadius: 38,
-    borderWidth: 2,
+    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center'
   },
